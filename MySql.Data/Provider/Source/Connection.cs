@@ -319,12 +319,16 @@ namespace MySql.Data.MySqlClient
                 CloseFully();
                 driver = existingDriver;
             }
-
+            
             if (driver.CurrentTransaction == null)
             {
+                //Need to remove as we dont want to through an exception. 
+                //Just dont support it and we'll deal with it client side.
+
                 MySqlPromotableTransaction t = new MySqlPromotableTransaction(this, transaction);
                 if (!transaction.EnlistPromotableSinglePhase(t))
-                    throw new NotSupportedException(Resources.DistributedTxnNotSupported);
+                    return;
+                //    throw new NotSupportedException(Resources.DistributedTxnNotSupported);
 
                 driver.CurrentTransaction = t;
                 DriverTransactionManager.SetDriverInTransaction(driver);
@@ -694,7 +698,7 @@ namespace MySql.Data.MySqlClient
             }
         }
 
-#region Routines for timeout support.
+        #region Routines for timeout support.
 
         // Problem description:
         // Sometimes, ExecuteReader is called recursively. This is the case if
